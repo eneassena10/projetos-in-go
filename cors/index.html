@@ -11,8 +11,7 @@
         async function doRequest() {
             let url = 'http://localhost:8080/hello';
             let request = await fetch(url);
-            console.log(request.ok)
-    
+
             if(request.ok) {
 
                 return await request.text();
@@ -22,7 +21,6 @@
             }
         }
         doRequest().then(data => {
-            console.log(data)
             document.getElementById("output").innerText = data;
         })
     </script>
