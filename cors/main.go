@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"github.com/rs/cors"
+	"log"
 	"net/http"
 )
 
@@ -19,11 +19,16 @@ func main() {
 		AllowCredentials: false,
 	})
 
-	mux.HandleFunc("/hello", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-		fmt.Fprintln(w, "Hello there!")
-	})
+	mux.HandleFunc("/hello", handlerHello())
 
 	handler := cors.Handler(mux)
+	log.Println("listennig...")
 	http.ListenAndServe(":8080", handler)
+}
+
+func handlerHello() http.HandlerFunc {
+	return func(writer http.ResponseWriter, request *http.Request) {
+		writer.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		writer.Write([]byte("Hello There!"))
+	}
 }
