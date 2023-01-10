@@ -2,21 +2,28 @@ package main
 
 import (
 	"fmt"
-	"log"
+	"github.com/rs/cors"
 	"net/http"
 )
 
 func main() {
-	http.HandleFunc("/hello", HelloHandler)
+	mux := http.NewServeMux()
 
-	log.Println("Listening...")
-	log.Fatal(http.ListenAndServe(":8080", nil))
-}
+	cors := cors.New(cors.Options{
+		AllowedOrigins: []string{"*"},
+		AllowedMethods: []string{
+			http.MethodPost,
+			http.MethodGet,
+		},
+		AllowedHeaders:   []string{"*"},
+		AllowCredentials: false,
+	})
 
-func HelloHandler(w http.ResponseWriter, _ *http.Request) {
-	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-	w.Header().Set("Access-Control-Allow-Origin", "http://127.0.0.1:80")
-	w.Header().Set("Access-Control-Max-Age", "15")
-	fmt.Println(w, "Hello, there")
-	w.Write([]byte("Hello, there"))
+	mux.HandleFunc("/hello", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		fmt.Fprintln(w, "Hello there!")
+	})
+
+	handler := cors.Handler(mux)
+	http.ListenAndServe(":8080", handler)
 }
