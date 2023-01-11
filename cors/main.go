@@ -1,34 +1,49 @@
 package main
 
 import (
-	"github.com/rs/cors"
-	"log"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"net/http"
 )
 
-func main() {
-	mux := http.NewServeMux()
-
-	cors := cors.New(cors.Options{
-		AllowedOrigins: []string{"*"},
-		AllowedMethods: []string{
-			http.MethodPost,
-			http.MethodGet,
-		},
-		AllowedHeaders:   []string{"*"},
-		AllowCredentials: false,
-	})
-
-	mux.HandleFunc("/hello", handlerHello())
-
-	handler := cors.Handler(mux)
-	log.Println("listennig...")
-	http.ListenAndServe(":8080", handler)
+type User struct {
+	Name  string `json:"name"`
+	Email string `json:"email"`
 }
 
-func handlerHello() http.HandlerFunc {
-	return func(writer http.ResponseWriter, request *http.Request) {
-		writer.Header().Set("Content-Type", "text/plain; charset=utf-8")
-		writer.Write([]byte("Hello There!"))
+var (
+	words = []string{"kind", "warm", "cup", "coin", "blue"}
+	users = []User{
+		{
+			Name:  "Carlos",
+			Email: "carlos@hotmail.com",
+		},
+		{
+			Name:  "Lucas Santos",
+			Email: "lucas@hmail.com",
+		},
 	}
+)
+
+func getWords(e echo.Context) error {
+	return e.JSON(http.StatusOK, words)
+}
+
+func getUsers(e echo.Context) error {
+	return e.JSON(http.StatusOK, users)
+}
+
+func main() {
+	e := echo.New()
+
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowMethods: []string{http.MethodGet, http.MethodPost, http.MethodDelete},
+	}))
+	const path = "/api"
+
+	e.GET(path+"/words", getWords)
+	e.GET(path+"/users", getUsers)
+
+	e.Logger.Fatal(e.Start(":8080"))
+
 }
